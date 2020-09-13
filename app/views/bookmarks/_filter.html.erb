@@ -20,12 +20,20 @@
           </div>
         </div>
       </div>
-      <% Array(suggest_tags).each do |tag| %>
-        <% selected_class = tag.name == params[:tag] ? 'bg-orange-100' : 'hover:bg-orange-50' %>
-        <%= link_to tag.name, request.params.except(:page).merge(tag: tag.name), class: "flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 #{selected_class}" %>
+      <% suggest_tags.each_with_index do |tag, index| %>
+        <% hidden_class = 'hidden lg:block' if index >= 3 %>
+        <% if tag == params[:tag] %>
+          <%= link_to tag, request.params.except(:page, :tag), class: "#{hidden_class} flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 bg-orange-100" %>
+        <% else %>
+          <%= link_to tag, request.params.except(:page).merge(tag: tag), class: "#{hidden_class} flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 hover:bg-orange-50" %>
+        <% end %>
       <% end %>
-      <% if params[:tag] && suggest_tags.pluck(:name).exclude?(params[:tag]) %>
-        <%= link_to params[:tag], request.params.except(:page).merge(tag: params[:tag]), class: 'flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 bg-orange-100' %>
+      <% if params[:tag] %>
+        <% if suggest_tags.exclude?(params[:tag]) %>
+          <%= link_to params[:tag], request.params.except(:page, :tag), class: 'flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 bg-orange-100' %>
+        <% elsif suggest_tags.first(3).exclude?(params[:tag]) %>
+          <%= link_to params[:tag], request.params.except(:page, :tag), class: 'lg:hidden flex-shrink-0 px-2 py-1 rounded text-sm font-medium text-orange-800 bg-orange-100' %>
+        <% end %>
       <% end %>
     </div>
   </div>
