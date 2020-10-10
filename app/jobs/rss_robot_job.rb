@@ -19,6 +19,7 @@ class RssRobotJob < ApplicationJob
         rss_source.touch(:processed_at, time: processed_at)
         return
       end
+      init_rss_source_tag!(rss_source)
       feed.entries.reverse_each do |entry|
         next if User.rss_robot.bookmarks.exists?(url: entry.url)
         title = entry.title.force_encoding("utf-8")
@@ -34,15 +35,6 @@ class RssRobotJob < ApplicationJob
           lang:        lang,
         )
         if bookmark.save
-          if !rss_source.tag
-            tag = Tag.find_by(name: rss_source.tag_name)
-            if tag
-              tag.update!(is_rss: true)
-              rss_source.update!(tag: tag)
-            else
-              rss_source.create_tag!(is_rss: true, name: rss_source.tag_name, user: User.rss_robot)
-            end
-          end
           CreateTag.call(bookmark, [rss_source.tag_name], User.rss_robot)
         else
           logger.error "[RssRobotJob] Save bookmark failed: #{bookmark.errors.full_messages.to_sentence}"
@@ -50,9 +42,21 @@ class RssRobotJob < ApplicationJob
       end
       rss_source.touch(:processed_at, time: processed_at)
     rescue => e
-      logger.error "[RssRobotJob] process #{rss_source.tag_name} - #{rss_source.url} failed"
+      logger.error "[RssRobotJob] process #{rss_source.url} failed"
       logger.error e.message
       logger.error e.backtrace.join("\n")
+    end
+
+    def init_rss_source_tag!(rss_source)
+      if !rss_source.tag
+        tag = Tag.find_by(name: rss_source.tag_name)
+        if tag
+          tag.update!(is_rss: true)
+          rss_source.update!(tag: tag)
+        else
+          rss_source.create_tag!(is_rss: true, name: rss_source.tag_name, user: User.rss_robot)
+        end
+      end
     end
 
     def http
