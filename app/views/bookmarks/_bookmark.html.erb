@@ -43,7 +43,7 @@
             </svg>
           <% end %>
         <% end %>
-        <span data-controller="hover-like-users" data-hover-like-users-url-value="<%= hover_like_users_bookmark_path(bookmark) %>" data-action="mouseenter->hover-like-users#show mouseleave->hover-like-users#hide">
+        <span data-controller="hover-like-users" data-hover-like-users-url-value="<%= hover_like_users_bookmark_path(bookmark) %>" data-action="mouseover->hover-like-users#show mouseout->hover-like-users#hide">
           <button data-target="likes.data" type="button" class="-ml-px relative inline-flex items-center p-1 lg:px-3 lg:py-2 rounded-r-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-800 hover:text-gray-800 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-800 transition ease-in-out duration-150">
             <%= bookmark.likes_count %>
           </button>
